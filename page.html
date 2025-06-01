@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1">
+    <title>Jeon Seong been</title>
+    <link rel="stylesheet" href="home.css">
+    <link rel="stylesheet" href="introduce.css">
+    <link rel="stylesheet" href="guestbook.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gorditas:wght@400;700&family=Jua&display=swap"
+        rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Introduce 섹션의 카테고리 버튼 클릭 이벤트 처리 함수 (전역 범위에 선언해야 함)
+        function showCategory(category) {
+            // 모든 카테고리 숨김
+            document.getElementById('korean-foods').style.display = 'none';
+            document.getElementById('western-foods').style.display = 'none';
+
+            // 선택한 카테고리만 표시
+            document.getElementById(category + '-foods').style.display = 'flex';
+        }
+        // 슬라이드 쇼 기능
+        function changeSlide(button, direction) {
+            const container = button.closest('.slideshow-container');
+            const slides = container.querySelectorAll('.slide');
+            let currentIndex = Array.from(slides).findIndex(slide => slide.classList.contains('active'));
+
+            slides[currentIndex].classList.remove('active');
+            currentIndex = (currentIndex + direction + slides.length) % slides.length;
+            slides[currentIndex].classList.add('active');
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".food-item img").forEach(img => {
+                img.addEventListener("click", function () {
+                    // 가장 가까운 .food-item 요소를 찾음
+                    const foodItem = this.closest(".food-item");
+                    const recipeText = foodItem?.querySelector(".recipe")?.innerText || "레시피가 아직 없습니다.";
+                    document.getElementById("modal-recipe").innerText = recipeText;
+                    document.getElementById("recipe-modal").style.display = "block";
+                });
+            });
+        });
+
+        function closeModal() {
+            document.getElementById("recipe-modal").style.display = "none";
+        }
+
+        // 페이지 로드 시 메뉴 클릭 이벤트 처리
+        window.onload = function () {
+            document.querySelectorAll("nav a").forEach(link => {
+                link.addEventListener("click", function (e) {
+                    e.preventDefault(); // 링크 기본 동작 막기
+                    const targetId = this.dataset.section;
+
+                    // 모든 섹션 숨기기
+                    document.querySelectorAll(".section").forEach(section => {
+                        section.classList.remove("active");
+                    });
+
+                    // 클릭한 섹션 보이기
+                    document.getElementById(targetId).classList.add("active");
+                });
+            });
+
+
+            $("#add-btn").click(function () {
+                const name = $("#guest-name").val().trim();
+                const message = $("#guest-input").val().trim();
+
+                // 자동 날짜
+                const date = new Date().toLocaleString(); // 시스템 시간 기반
+
+                if (name === "" || message === "") {
+                    alert("이름과 메시지를 모두 입력해주세요!");
+                    return;
+                }
+                if (name.length > 10) {
+                    alert("이름은 10자 이하로 입력해주세요!");
+                    return;
+                }
+                if (message.length > 30) {
+                    alert("메시지는 30자 이하로 입력해주세요!");
+                    return;
+                }
+
+
+                const listItem = $("<li>");
+                const meta = $("<div style='overflow:hidden;'>").addClass("meta").text(`${name} • ${date}`);
+                const msg = $("<div>").text(message);
+                const deleteBtn = $("<span>").text("삭제").addClass("delete-btn");
+
+                deleteBtn.click(function () {
+                    $(this).parent().remove();
+                });
+
+                listItem.append(meta, msg, deleteBtn);
+                $("#guest-list").append(listItem);
+
+                // 입력창 초기화
+                $("#guest-name").val("");
+                $("#guest-input").val("");
+            });
+
+            // 달력 기능
+            const monthNames = ["1월", "2월", "3월", "4월", "5월", "6월",
+                "7월", "8월", "9월", "10월", "11월", "12월"];
+
+            let currentDate = new Date(); // 오늘 날짜 기준
+
+            const calendarGrid = document.getElementById("calendar-grid");
+            const calendarHeader = document.querySelector(".calendar-header span");
+            const prevBtn = document.getElementById("prev-month");
+            const nextBtn = document.getElementById("next-month");
+
+            // 달력 표시 함수
+            function renderCalendar(date) {
+                const year = date.getFullYear();
+                const month = date.getMonth();
+
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const today = new Date();
+
+                // 월/년도 헤더 업데이트
+                calendarHeader.textContent = `${year}년 ${monthNames[month]}`;
+
+                // 기존 내용 제거
+                calendarGrid.innerHTML = "";
+
+                // 요일(일~토) 출력
+                const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
+                weekdays.forEach(day => {
+                    const dayElement = document.createElement("div");
+                    dayElement.textContent = day;
+                    dayElement.style.fontWeight = "bold";
+                    calendarGrid.appendChild(dayElement);
+                });
+
+                // 빈칸 채우기 (1일 전 요일 수만큼)
+                for (let i = 0; i < firstDay.getDay(); i++) {
+                    const empty = document.createElement("div");
+                    calendarGrid.appendChild(empty);
+                }
+
+                // 날짜 채우기
+                for (let i = 1; i <= lastDay.getDate(); i++) {
+                    const day = document.createElement("div");
+                    day.textContent = i;
+                    day.classList.add("calendar-day");
+
+                    // 오늘 날짜 표시
+                    if (
+                        i === today.getDate() &&
+                        month === today.getMonth() &&
+                        year === today.getFullYear()
+                    ) {
+                        day.classList.add("today");
+                    }
+
+                    calendarGrid.appendChild(day);
+                }
+            }
+
+            // 버튼 이벤트
+            prevBtn.addEventListener("click", () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar(currentDate);
+            });
+
+            nextBtn.addEventListener("click", () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar(currentDate);
+            });
+
+            // 최초 렌더링
+            renderCalendar(currentDate);
+        }
+    </script>
+
+</head>
+
+
+<body>
+
+    <nav>
+        <div>
+            <a href="#" data-section="Home">Home</a>
+            <a href="#" data-section="Introduce">Introduce</a>
+            <a href="#" data-section="Guestbook">Guestbook</a>
+        </div>
+    </nav>
+    <div class="nav-underline"
+        style="height: 1px; background-color: #6A75CA; width: 99%; position: absolute; top: 38px;"></div>
+
+
+
+    <div id="Home" class="section active">
+
+        <img src="myPhoto.jpg" alt="My Image" class="profile">
+        <div class="info">
+            <h3>
+                <span class="highlight">학과:</span> 컴퓨터공학과<br>
+                <span class="highlight">학번:</span> 21학번<br>
+                <span class="highlight">이름:</span> 전성빈
+            </h3>
+
+            <div class="link_container">
+                <a href="https://www.instagram.com/been.js/" target="_blank">
+                    <img src="인스타그램.png" alt="인스타그램">
+                </a>
+                <a href="https://www.facebook.com/profile.php?id=100009059367187&locale=ko_KR" target="_blank">
+                    <img src="페이스북.png" alt="페이스북">
+                </a>
+                <a href="https://github.com/jsb0816" target="_blank">
+                    <img src="깃허브.png" alt="깃허브">
+                </a>
+            </div>
+
+        </div>
+
+        <div class="info">
+            <h3
+                style="color: #6A75CA; font-weight: bold; display: block; margin-top: 20px; margin-left: auto; margin-right: auto; text-align: center;">
+                안녕하세요! 저의 웹페이지를 소개합니다!
+                이 웹페이지에서는 제가 자취를 하며 만들어 본
+                다양한 음식들의 레시피를 공유하고자 합니다!
+            </h3>
+        </div>
+
+        <footer>
+            <div>
+                <p>Copyright &copy; 2025 Jeon Seong been</p>
+            </div>
+        </footer>
+    </div>
+
+    <div id="Introduce" class="section">
+
+        <div class="category-buttons">
+            <button onclick="showCategory('korean')">한식</button>
+            <button onclick="showCategory('western')">양식</button>
+        </div>
+
+        <div id="korean-foods" class="food-gallery slider">
+            <!-- 음식 이미지 + 레시피 설명 (예시) -->
+            <div class="food-item ">
+                <img src="./foods/간장계란후라이.jpg" alt="간장계란후라이">
+                <div class="recipe">간장계란후라이 레시피<br><br>
+                    1. 계란을 프라이팬에 깨뜨려 중불로 익힌다.<br>
+                    2. 계란이 반숙 상태가 되면 조금씩 으깨어 간장을 뿌린다.<br>
+                    3. 간장이 뜨거운 프라이팬에 타며 풍미를 더한다.<br>
+                    4. 소금과 후추로 간을 맞춘다.<br>
+                    5. 밥 위에 올려서 먹는다.
+
+                </div>
+            </div>
+            <div class="food-item">
+                <img src="./foods/고급계볶밥.jpg" alt="고급계란볶밥">
+                <div class="recipe">고급계란볶밥 레시피<br><br>
+                    1. 밥과 계란을 준비한다.<br>
+                    2. 팬에 기름을 두르고 계란을 익힌다.<br>
+                    3. 이때 노른자는 건들이지 말고, 흰자만 스크램블 해준다.<br>
+                    4. 흰자가 다 익어갈때 쯤, 간장을 넣고 조금 태워주며 노른자를 터뜨린다.<br>
+                    5. 조금 덜 익었겠다 싶을때 밥 위에 얹혀준다.<br>
+
+                </div>
+            </div>
+
+            <div class="food-item">
+                <img src="./foods/들기름명란젓구이.jpg" alt="들기름명란젓구이">
+                <div class="recipe">들기름명란젓구이 레시피<br><br>
+                    1. 명란젓과 직접 짠 들기름을 준비한다.<br>
+                    2. 팬에 기름을 두르고 명란젓을 굽는다. <br>
+                    3. 겉만 노릇하게 구워지면 칼집을 내서 사이에 들기름을 뿌려준다.<br>
+                    4. 청량고추와 계란 노른자를 곁들여 먹는다.
+                </div>
+            </div>
+            <div class="food-item">
+                <img src="./foods/명란젓구이.jpg" alt="명란젓구이">
+                <div class="recipe">명란젓구이 레시피<br><br>
+                    1. 명란젓을 준비한다.<br>
+                    2. 팬에 기름을 두르고 명란젓을 굽는다.<br>
+                    3. 노릇하게 구워지면 완성한다.
+                </div>
+            </div>
+            <div class="food-item slideshow-container">
+                <div class="slides">x
+                    <img src="./foods/불짜1.jpg" alt="불짜1" class="slide active">
+                    <img src="./foods/불짜2.jpg" alt="불짜2" class="slide">
+                </div>
+                <button class="prev" onclick="changeSlide(this, -1)">&#10094;</button>
+                <button class="next" onclick="changeSlide(this, 1)">&#10095;</button>
+                <div class="recipe">불짜 레시피<br><br>
+                    1. 불닭볶음면과 짜파게티를 준비한다.<br>
+                    2. 면을 익혀 불닭볶음면과 짜파게티를 섞는다.<br>
+                    3. 굴소스를 추가해서 조금 더 볶아준다.<br>
+                    4. 편의점 핫바를 잘라서 곁들여 먹는다.
+                </div>
+            </div>
+            <div class="food-item slideshow-container">
+                <div class="slides">
+                    <img src="./foods/안성탕면1.jpg" alt="안성탕면1" class="slide active">
+                    <img src="./foods/안성탕면2.jpg" alt="안성탕면2" class="slide">
+                    <img src="./foods/안성탕면3.jpg" alt="안성탕면3" class="slide">
+                </div>
+                <button class="prev" onclick="changeSlide(this, -1)">&#10094;</button>
+                <button class="next" onclick="changeSlide(this, 1)">&#10095;</button>
+                <div class="recipe">계란 안성탕면 레시피<br><br>
+                    1. 안성탕면을 준비한다.<br>
+                    2. 보통대로 안성탕면을 만들고, 국물을 조금 남긴다.<br>
+                    3. 남은 국물에 계란 세 개를 풀고, 고추가루를 더 넣고 마지막에 참기름을 뿌려준다.<br>
+                    4. 라면과 함께 먹으면 너무 맛있다.
+                </div>
+            </div>
+            <div class="food-item">
+                <img src="./foods/콩나물국.jpg" alt="콩나물국">
+                <div class="recipe">콩나물국 레시피<br><br>
+                    1. 콩나물을 준비한다.<br>
+                    2. 물을 끓이고 콩나물을 넣는다.<br>
+                    3. 맛소금으로 간을 맞춘다.<br>
+                    4. 끓인 후 그릇에 담아 낸다.<br>
+                    5. 대파와 청양고추를 밑에 넣고 대친 콩나물을 넣고 냉장고에 넣는다.
+                </div>
+            </div>
+            <div class="food-item">
+                <img src="./foods/희생당한 계란.jpg" alt="희생당한 계란">
+                <div class="recipe">희생당한 계란들..<br><br>
+                    1. 그동안 자취를 하며 희생당한 계란들이다.<br>
+                    2. 주식이 계란 볶음밥이다.<br>
+                    3. 자취 초반에는 이것보다 더 높은 계란 껍질 탑을 쌓은 전적이 있다.<br>
+                </div>
+            </div>
+
+
+
+        </div>
+
+        <div id="western-foods" class="food-gallery" style="display: none;">
+            <div class="food-item">
+                <img src="./foods/까르보나라.jpg" alt="까르보나라">
+                <div class="recipe">까르보나라 레시피<br><br>
+                    1. 면과 소금을 적당한 물에 넣고 면수를 남긴다.<br>
+                    2. 팬에 기름을 두르고 양파, 마늘, 양송이 버섯, 베이컨을 볶는다.<br>
+                    3. 재료가 노릇하게 볶아질 때 쯤, 우유와 체다치즈와 면수를 넣는다.<br>
+                    4. TIP! 체다치즈를 넣을수록 꾸덕해진다.<br>
+                    5. 면을 넣고 잘 섞어 완성한다.
+                </div>
+            </div>
+            <div class="food-item slideshow-container">
+                <div class="slides">
+                    <img src="./foods/불크파1.jpg" alt="불크파1" class="slide active">
+                    <img src="./foods/불크파2.jpg" alt="불크파2" class="slide">
+                </div>
+                <button class="prev" onclick="changeSlide(this, -1)">&#10094;</button>
+                <button class="next" onclick="changeSlide(this, 1)">&#10095;</button>
+                <div class="recipe">불닭 크림파스타 레시피<br><br>
+                    1. 면과 소금을 적당한 물에 넣고 면수를 남긴다.<br>
+                    2. 팬에 기름을 두르고 양파, 마늘, 양송이 버섯, 베이컨을 볶는다.<br>
+                    3. 재료가 노릇하게 볶아질 때 쯤, 면수와 불닭소스, 우유, 체다치즈를 넣는다.<br>
+                    4. TIP! 체다치즈를 넣을수록 꾸덕해진다.<br>
+                    5. 면을 넣고 잘 섞어 완성한다.
+                </div>
+            </div>
+            <div class="food-item slideshow-container">
+                <div class="slides">
+                    <img src="./foods/소고기1.jpg" alt="소고기1" class="slide active">
+                    <img src="./foods/소고기2.jpg" alt="소고기2" class="slide">
+                    <img src="./foods/소고기3.jpg" alt="소고기3" class="slide">
+                </div>
+                <button class="prev" onclick="changeSlide(this, -1)">&#10094;</button>
+                <button class="next" onclick="changeSlide(this, 1)">&#10095;</button>
+                <div class="recipe">소고기 레시피<br><br>
+                    1. 소고기에있는 핏기를 키친타울로 제거한다.<br>
+                    2. 팬에 기름을 두르고 소고기를 굽는다.<br>
+                    3. 겉면을 약간 태우듯이 굽는다.<br>
+                    4. 버터와 마늘을 추가해서 계속 끼얹어 준다.<br>
+                    5. 고기를 건져내서 쿠킹 호일로 4~5분간 감싸준다.(고기의 안까지 열이 전달되도록 하는 작업이다.)<br>
+                    6. 고기를 썰어서 접시에 담고, 팬에 남은 육즙을 끼얹어준다.
+
+                </div>
+            </div>
+            <div class="food-item slideshow-container">
+                <div class="slides">
+                    <img src="./foods/알리오올리오1.jpg" alt="알리오올리오1" class="slide active">
+                    <img src="./foods/알리오올리오2.jpg" alt="알리오올리오2" class="slide">
+                </div>
+                <button class="prev" onclick="changeSlide(this, -1)">&#10094;</button>
+                <button class="next" onclick="changeSlide(this, 1)">&#10095;</button>
+                <div class="recipe">알리오올리오 레시피<br><br>
+                    1. 면과 소금을 적당한 물에 넣고 면수를 남긴다.<br>
+                    2. 팬에 기름을 두르고 양파, 마늘, 양송이 버섯을 볶는다.<br>
+                    3. 재료가 노릇하게 볶아질 때 쯤, 면수와 굴소스 혹은 치킨스톡을 넣는다.<br>
+                    4. TIP! 새우를 넣어도 맛있다.<br>
+                    5. 면을 넣고 잘 섞어 완성한다.(TIP! 만테까레를 해주면 소스가 면에 잘 스며든다)
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <footer>
+        <div>
+            <p>Copyright &copy; 2025 Jeon Seong been</p>
+        </div>
+    </footer>
+
+    <div id="Guestbook" class="section">
+        <div class="guestbook">
+            <h2>방명록을 남겨주세요!<br>
+                <p style="font-size: 12px;">새로고침시 초기화 됩니다!</p>
+            </h2>
+            <input type="text" id="guest-name" placeholder="이름을 입력해주세요" />
+            <textarea id="guest-input" placeholder="메시지를 남겨주세요"></textarea>
+            <button id="add-btn">등록</button>
+            <ul id="guest-list"></ul>
+        </div>
+
+        <div class="calendar">
+            <h2>📅 달력</h2>
+            <div class="calendar-header">
+                <button id="prev-month">&lt;</button>
+                <span id="current-month-year"></span>
+                <button id="next-month">&gt;</button>
+            </div>
+            <div id="calendar-grid"></div>
+        </div>
+
+    </div>
+    <footer>
+        <div>
+            <p>Copyright &copy; 2025 Jeon Seong been</p>
+        </div>
+    </footer>
+
+
+    <!-- 레시피 모달 -->
+    <div id="recipe-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div id="modal-recipe" class="modal-recipe-text">레시피 설명이 여기에 표시됩니다.</div>
+        </div>
+    </div>
+    </div>
+
+</body>
+
+</html>

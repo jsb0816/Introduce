@@ -1,0 +1,134 @@
+body {
+    background-color: #EFF2F8;
+    min-width: 360px;
+    min-height: 500px;
+}
+
+header {
+    color: white;
+    padding: 10px 0;
+}
+
+nav {
+    padding: 5px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: white;
+    width: 100%;
+
+}
+
+nav div {
+    text-align: center;
+    height: 30px;
+}
+
+nav a {
+    text-align: center;
+    margin-right: 10px;
+    text-decoration: none;
+    padding: 10px;
+    color: #6A75CA;
+
+}
+
+nav a:hover {
+    background-color: #EFF2F8;
+    color: #333;
+}
+
+#Home {
+
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 10% 5%;
+    background-color: #EFF2F8;
+    flex-wrap: wrap;
+}
+
+#Home img.profile {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    object-fit: cover;
+}
+
+#Home .info {
+    max-width: 400px;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: #333;
+}
+
+.highlight {
+    color: #6A75CA;
+    font-weight: bold;
+}
+
+.link_container {
+    margin-top: 20px;
+}
+
+.link_container a img {
+    width: 30px;
+    height: 30px;
+}
+
+.link_container a img:hover {
+    transform: scale(1.2);
+}
+
+.section {
+    display: none;
+    /* 기본적으로 숨김 */
+}
+
+.section.active {
+    display: flex;
+    /* active 클래스가 붙으면 보임 */
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+
+@media (max-width: 768px) {
+    #Home img.profile {
+        width: 160px;
+        height: 160px;
+    }
+
+    #Home .info {
+        font-size: 1rem;
+    }
+
+    .link_container a img {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    #Home img.profile {
+        width: 120px;
+        height: 120px;
+    }
+
+    #Home .info {
+        font-size: 0.9rem;
+    }
+
+    .link_container a img {
+        width: 20px;
+        height: 20px;
+    }
+}
